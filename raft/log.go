@@ -4,7 +4,7 @@ package raft
 type LogEntry struct {
 	Term    int
 	Index   int
-	Command interface{}
+	Command []byte
 }
 
 // lastLogIndexAndTerm returns the index and term of the last log entry,
