@@ -27,14 +27,14 @@ func NewInMemTransport() *InMemTransport {
 }
 
 // AddPeer registers a node under the given ID.
-func (t *InMemTransport) AddPeer (id int, node RaftNode) {
+func (t *InMemTransport) AddPeer(id int, node RaftNode) {
 	t.mu.Lock()
 	defer t.mu.Unlock()		// used to guarantee the mutex is always unlocked even if function panics
 	t.peers[id] = node
 }
 
 // SendRequestVote forwards a RequestVote RPC to the target node.
-func (t *InMemTransport) SendRequestVote (toID int, args raft.RequestVoteArgs) (raft.RequestVoteReply, error) {
+func (t *InMemTransport) SendRequestVote(toID int, args raft.RequestVoteArgs) (raft.RequestVoteReply, error) {
 	t.mu.RLock()
 	node, ok := t.peers[toID]
 	t.mu.RUnlock()
