@@ -40,6 +40,7 @@ type Node struct {
 	applyCh       chan LogEntry
 	electionTimer *time.Timer
 	stopCh        chan struct{}
+	stopOnce	  sync.Once
 	rand          *rand.Rand
 }
 
@@ -88,8 +89,10 @@ func (n *Node) loadState() error {
 
 // Stop shuts down the node's background goroutine.
 func (n *Node) Stop() {
-	close(n.stopCh)
-	n.electionTimer.Stop()
+	n.stopOnce.Do(func() {
+		close(n.stopCh)
+		n.electionTimer.Stop()
+	})
 }
 
 func (n *Node) run() {
