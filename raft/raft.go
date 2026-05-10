@@ -400,12 +400,12 @@ func (n *Node) AppendEntries(args AppendEntriesArgs) (AppendEntriesReply, error)
 }
 
 // Submit appends a command to the log. Returns an error if the node is not the leader.
-func (n *Node) Submit(command []byte) error {
+func (n *Node) Submit(command []byte) (int, error) {
 	n.mu.Lock()
 	defer n.mu.Unlock()
 
 	if n.state != Leader {
-		return fmt.Errorf("not leader")
+		return 0, fmt.Errorf("not leader")
 	}
 
 	index, _ := lastLogIndexAndTerm(n.log)
@@ -416,5 +416,5 @@ func (n *Node) Submit(command []byte) error {
 	}
 	n.log = append(n.log, entry)
 	n.matchIndex[n.id] = entry.Index
-	return n.saveState()
+	return entry.Index, n.saveState()
 }
