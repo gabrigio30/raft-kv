@@ -418,3 +418,10 @@ func (n *Node) Submit(command []byte) (int, error) {
 	n.matchIndex[n.id] = entry.Index
 	return entry.Index, n.saveState()
 }
+
+// IsLeader reports whether this node is the current leader.
+func (n *Node) IsLeader() bool {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	return n.state == Leader
+}

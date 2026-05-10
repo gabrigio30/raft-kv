@@ -18,7 +18,7 @@ type Client struct {
 // NewClient creates a client connected to the given stores.
 func NewClient(stores []*KVStore) *Client {
 	return &Client{
-		id: fmt.Sprintf("client-&d", rand.Int63()),
+		id: fmt.Sprintf("client-%d", rand.Int63()),
 		stores: stores,
 	}
 }
