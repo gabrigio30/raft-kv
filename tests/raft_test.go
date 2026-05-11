@@ -104,6 +104,7 @@ func TestLeaderFailover(t *testing.T) {
 	if leaderIdx == -1 {
 		t.Fatal("no leader found before failover")
 	}
+	failoverStart := time.Now()
 	nodes[leaderIdx].Stop()
 
 	remaining := make([]*raft.Node, 0, n-1)
@@ -127,6 +128,7 @@ func TestLeaderFailover(t *testing.T) {
 	if err := client.Put("post-failover", "yes"); err != nil {
 		t.Fatalf("Put after failover: %v", err)
 	}
+	t.Logf("failover latency: %v", time.Since(failoverStart))
 	val, err := client.Get("post-failover")
 	if err != nil {
 		t.Fatalf("Get post-failover: %v", err)

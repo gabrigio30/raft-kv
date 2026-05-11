@@ -216,7 +216,7 @@ func (n *Node) sendHeartbeats() {
 			}
 			n.mu.Unlock()
 			for _, peer := range n.peers {
-				go n.sendAppendEntries(peer)
+				n.sendAppendEntries(peer)
 			}
 		case <-n.stopCh:
 			return
@@ -406,6 +406,12 @@ func (n *Node) AppendEntries(args AppendEntriesArgs) (AppendEntriesReply, error)
 func (n *Node) Submit(command []byte) (int, error) {
 	n.mu.Lock()
 	defer n.mu.Unlock()
+
+	select {
+	case <-n.stopCh:
+		return 0, fmt.Errorf("not leader")
+	default:
+	}
 
 	if n.state != Leader {
 		return 0, fmt.Errorf("not leader")

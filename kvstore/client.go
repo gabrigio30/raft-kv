@@ -1,9 +1,10 @@
 package kvstore
 
-import(
+import (
 	"fmt"
 	"math/rand"
 	"sync"
+	"time"
 )
 
 // Client routes operations to the KV cluster leader.
@@ -57,18 +58,21 @@ func (c *Client) retry(fn func(*KVStore) error) error {
 	c.mu.Lock()
 	start := c.leader
 	c.mu.Unlock()
-	for i := 0; i < len(c.stores); i++ {
-		idx := (start + i) % len(c.stores)
-		err := fn(c.stores[idx])
-		if err == nil {
-			c.mu.Lock()
-			c.leader = idx
-			c.mu.Unlock()
-			return nil
+	for attempt := 0; attempt < 20; attempt++ {
+		for i := 0; i < len(c.stores); i++ {
+			idx := (start + i) % len(c.stores)
+			err := fn(c.stores[idx])
+			if err == nil {
+				c.mu.Lock()
+				c.leader = idx
+				c.mu.Unlock()
+				return nil
+			}
+			if err.Error() != "not leader" {
+				return err
+			}
 		}
-		if err.Error() != "not leader" {
-			return err
-		}
+		time.Sleep(50 * time.Millisecond)
 	}
 	return fmt.Errorf("no leader found")
 }
